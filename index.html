@@ -1,210 +1,606 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>HDR Photography – Bruce Lomasky</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bruce Lomasky — Photography</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0e0e0e;
+    --paper: #f5f2ee;
+    --dim: #7a776f;
+    --rule: rgba(245,242,238,0.12);
+    --accent: #c8a86b;
+    --transition: 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 3rem 4rem 2rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .site-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: 1.5rem;
+    letter-spacing: 0.08em;
+    color: var(--paper);
+    text-decoration: none;
+  }
+
+  .site-name em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  nav {
+    display: flex;
+    gap: 2.5rem;
+    font-size: 0.72rem;
+    font-weight: 200;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  nav a {
+    color: var(--dim);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  nav a:hover { color: var(--paper); }
+  nav a.active { color: var(--paper); }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 5rem 4rem 3.5rem;
+  }
+
+  .hero-label {
+    font-size: 0.65rem;
+    font-weight: 400;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+  }
+
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: clamp(2.8rem, 6vw, 5.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    max-width: 14ch;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--dim);
+  }
+
+  .hero-meta {
+    margin-top: 2rem;
+    font-size: 0.78rem;
+    font-weight: 200;
+    letter-spacing: 0.1em;
+    color: var(--dim);
+    display: flex;
+    gap: 2.5rem;
+    align-items: center;
+  }
+
+  .hero-meta span::before {
+    content: '';
+    display: inline-block;
+    width: 1.5rem;
+    height: 1px;
+    background: var(--dim);
+    vertical-align: middle;
+    margin-right: 0.75rem;
+  }
+
+  /* ── Gallery grid ── */
+  .gallery-section {
+    padding: 0 4rem 6rem;
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Layout variants */
+  .photo-item { overflow: hidden; cursor: pointer; position: relative; }
+  .photo-item:focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+
+  .photo-item.wide   { grid-column: span 8; }
+  .photo-item.narrow { grid-column: span 4; }
+  .photo-item.half   { grid-column: span 6; }
+  .photo-item.full   { grid-column: span 12; }
+  .photo-item.third  { grid-column: span 4; }
+
+  .photo-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform var(--transition), filter var(--transition);
+    aspect-ratio: inherit;
+  }
+
+  .photo-item.tall img  { aspect-ratio: 3/4; }
+  .photo-item.wide img  { aspect-ratio: 16/9; }
+  .photo-item.square img { aspect-ratio: 1; }
+  .photo-item.half img  { aspect-ratio: 4/3; }
+  .photo-item.third img { aspect-ratio: 1; }
+
+  .photo-item:hover img {
+    transform: scale(1.03);
+    filter: brightness(1.07);
+  }
+
+  /* Caption overlay */
+  .photo-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1.5rem 1.25rem 1rem;
+    background: linear-gradient(to top, rgba(10,10,10,0.75) 0%, transparent 100%);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+  }
+
+  .photo-item:hover .photo-caption {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .caption-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-weight: 300;
+    letter-spacing: 0.03em;
+    color: var(--paper);
+    display: block;
+  }
+
+  .caption-meta {
+    font-size: 0.65rem;
+    font-weight: 200;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(245,242,238,0.55);
+    margin-top: 0.25rem;
+    display: block;
+  }
+
+  /* ── Section divider ── */
+  .section-rule {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem 4rem 2.5rem;
+    color: var(--dim);
+    font-size: 0.65rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .section-rule::before, .section-rule::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  /* ── Lightbox ── */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(10, 10, 10, 0.97);
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    cursor: zoom-out;
+  }
+
+  .lightbox.open {
+    display: flex;
+    animation: lb-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes lb-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .lightbox-img {
+    max-width: min(90vw, 1400px);
+    max-height: 88vh;
+    object-fit: contain;
+    cursor: default;
+    animation: img-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes img-in {
+    from { transform: scale(0.93); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+  }
+
+  .lightbox-info {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .lightbox-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    color: var(--paper);
+  }
+
+  .lightbox-sub {
+    font-size: 0.65rem;
+    font-weight: 200;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-top: 0.35rem;
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1.75rem;
+    right: 2rem;
+    background: none;
+    border: none;
+    color: var(--dim);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 200;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 0.5rem;
+  }
+
+  .lightbox-close:hover { color: var(--paper); }
+
+  .lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--dim);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 1rem 1.5rem;
+    line-height: 1;
+  }
+
+  .lightbox-nav:hover { color: var(--paper); }
+  .lightbox-prev { left: 0; }
+  .lightbox-next { right: 0; }
+
+  /* ── Footer ── */
+  footer {
+    padding: 2.5rem 4rem;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.65rem;
+    font-weight: 200;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .footer-hdr-note {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+  }
+
+  .hdr-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* ── Scroll-in animation ── */
+  .photo-item {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease, filter 0.55s cubic-bezier(0.22,1,0.36,1);
+  }
+
+  .photo-item.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    header, .hero, .gallery-section, footer, .section-rule {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+    .photo-item.wide, .photo-item.narrow, .photo-item.half, .photo-item.third {
+      grid-column: span 12;
+    }
+    .hero h1 { font-size: 2.5rem; }
+    nav { gap: 1.5rem; }
+  }
+
+  @media (max-width: 600px) {
+    header { flex-direction: column; align-items: flex-start; gap: 1.25rem; }
+    nav { font-size: 0.65rem; }
+    .gallery-grid { gap: 0.75rem; }
+  }
+</style>
 </head>
 <body>
-  <header class="site-header">
-    <div class="brand">
-      <h1>HDR Photography</h1>
-      <p>Light beyond the visible</p>
-    </div>
-    <nav class="main-nav">
-      <ul>
-        <li class="nav-item nav-item-active" data-tab="gallery">Gallery</li>
-        <li class="nav-item" data-tab="about">About</li>
-        <li class="nav-item" data-tab="contact">Contact</li>
-      </ul>
-    </nav>
-  </header>
 
-  <main>
-    <!-- GALLERY TAB -->
-    <section id="tab-gallery" class="tab-panel tab-panel-active">
-      <!-- existing gallery content preserved -->
-      <section class="hero">
-        <div class="hero-text">
-          <h2>Hasselblad X2D II</h2>
-          <p>100 Megapixel · HDR — Gain Map JPEG · Collection 2026</p>
-        </div>
-      </section>
+<header>
+  <a href="#" class="site-name">Bruce Lomasky's <em>Photos</em></a>
+  <nav>
+    <a href="#" class="active">Gallery</a>
+    <a href="#">About</a>
+    <a href="#">Contact</a>
+  </nav>
+</header>
 
-      <section class="gallery-grid">
-        <article class="gallery-item">
-          <img src="images/pollys-daily-bread.jpg" alt="Pollys Daily Bread" />
-          <div class="gallery-caption">
-            <h3>Pollys Daily Bread</h3>
-            <p>At the Egg Drop for GCC</p>
-          </div>
-        </article>
+<section class="hero">
+  <p class="hero-label">HDR Photography</p>
+  <h1>Light <em>beyond</em><br>the visible</h1>
+  <div class="hero-meta">
+    <span>Hasselblad X2D II</span>
+    <span>100 Megapixel</span>
+    <span>HDR — Gain Map JPEG</span>
+  </div>
+</section>
 
-        <article class="gallery-item">
-          <img src="images/coastal-dusk.jpg" alt="Coastal dusk" />
-          <div class="gallery-caption">
-            <h3>Coastal dusk</h3>
-            <p>Norway · f/8 · ISO 64</p>
-          </div>
-        </article>
+<div class="section-rule">Collection 2026</div>
 
-        <article class="gallery-item">
-          <img src="images/lava-field.jpg" alt="Lava field" />
-          <div class="gallery-caption">
-            <h3>Lava field</h3>
-            <p>Iceland · f/11 · ISO 64</p>
-          </div>
-        </article>
+<!-- ═══════════════════════════════════════════
+     GALLERY — replace src with your photo paths
+     Each photo-item needs:
+       - Layout class: wide, narrow, half, third, full
+       - Aspect class: tall, square (wide/half have defaults)
+     ═══════════════════════════════════════════ -->
 
-        <article class="gallery-item">
-          <img src="images/glacial-melt.jpg" alt="Glacial melt" />
-          <div class="gallery-caption">
-            <h3>Glacial melt</h3>
-            <p>Greenland · f/8 · ISO 64</p>
-          </div>
-        </article>
+<section class="gallery-section">
 
-        <article class="gallery-item">
-          <img src="images/tundra-storm.jpg" alt="Tundra storm" />
-          <div class="gallery-caption">
-            <h3>Tundra storm</h3>
-            <p>Canada · f/9 · ISO 100</p>
-          </div>
-        </article>
+  <div class="gallery-grid">
 
-        <article class="gallery-item">
-          <img src="images/fjord-morning.jpg" alt="Fjord morning" />
-          <div class="gallery-caption">
-            <h3>Fjord morning</h3>
-            <p>Norway · f/7.1 · ISO 64</p>
-          </div>
-        </article>
-
-        <article class="gallery-item">
-          <img src="images/desert-hour.jpg" alt="Desert hour" />
-          <div class="gallery-caption">
-            <h3>Desert hour</h3>
-            <p>Namibia · f/8 · ISO 64</p>
-          </div>
-        </article>
-
-        <article class="gallery-item">
-          <img src="images/the-long-light.jpg" alt="The long light" />
-          <div class="gallery-caption">
-            <h3>The long light</h3>
-            <p>Scotland · Panorama · f/11 · ISO 64</p>
-          </div>
-        </article>
-      </section>
-    </section>
-
-    <!-- ABOUT TAB -->
-    <section id="tab-about" class="tab-panel">
-      <article class="text-panel">
-        <h2>About Bruce Lomasky</h2>
-        <p>
-          For more than 50 years, I have been exploring photography as both a craft and a way of seeing the world more clearly.
-          From darkrooms and slide film to digital sensors and HDR gain maps, the tools have changed, but the curiosity has not.
-        </p>
-        <p>
-          My work is driven by a fascination with how light shapes landscapes, faces, and stories.
-          Long before high‑resolution digital cameras, I was experimenting with exposure, dynamic range, and the limits of what a single frame could hold.
-        </p>
-        <p>
-          Today I work primarily with the Hasselblad X2D II and high‑resolution HDR workflows, building on decades of experimentation with format, optics, and printing.
-          The images in this gallery are part of an ongoing exploration of subtle color, texture, and the “in‑between” light that often goes unnoticed.
-        </p>
-        <p>
-          Over the years, photography has taken me from coastal dusk in Norway to lava fields in Iceland, from Greenland’s glacial melt to the long light of the Scottish highlands.
-          Each project is less about documenting a place and more about translating what it feels like to stand there in that exact moment.
-        </p>
-        <p>
-          This collection, and the ones that will follow, are a personal visual journal of that journey.
-          I hope the images invite you to slow down, look a little longer, and perhaps see your own familiar places with fresh eyes.
-        </p>
-      </article>
-    </section>
-
-    <!-- CONTACT TAB -->
-    <section id="tab-contact" class="tab-panel">
-      <article class="text-panel">
-        <h2>Contact</h2>
-        <p>
-          I welcome inquiries about most anything.<br>
-          The best way to reach me is directly by email or phone.
-        </p>
-        <p>
-          Email: <a href="mailto:bruce@bruceL.com">bruce@bruceL.com</a><br />
-          Phone: <a href="tel:8609300600">860-930-0600</a>
-        </p>
-      </article>
-    </section>
-  </main>
-
-  <div class="lightbox" id="lightbox">
-    <div class="lightbox-backdrop"></div>
-    <div class="lightbox-content">
-      <button class="lightbox-close" aria-label="Close">Close ✕</button>
-      <img src="" alt="" class="lightbox-image" />
-      <div class="lightbox-caption">
-        <h3></h3>
-        <p></p>
+    <div class="photo-item wide" tabindex="0"
+         data-src="/public/photos/PollysDailyBread.jpeg"
+         data-title="Pollys Daily Bread Title" data-meta="GCC Egg Drop">
+      <img src="/public/photos/PollysDailyBread.jpeg" alt="Pollys Daily Bread">
+      <div class="photo-caption">
+        <span class="caption-title">Pollys Daily Bread</span>
+        <span class="caption-meta">At the Egg Drop for GCC</span>
       </div>
     </div>
+
+    <div class="photo-item narrow tall" tabindex="0"
+         data-src="photos/photo-02.jpg"
+         data-title="Coastal dusk" data-meta="Norway · f/8 · ISO 64">
+      <img src="photos/photo-02.jpg" alt="Coastal dusk, Norway">
+      <div class="photo-caption">
+        <span class="caption-title">Coastal dusk</span>
+        <span class="caption-meta">Norway · f/8 · ISO 64</span>
+      </div>
+    </div>
+
   </div>
 
-  <script>
-    // Tab switching
-    document.querySelectorAll('.nav-item').forEach(function (item) {
-      item.addEventListener('click', function () {
-        var tab = this.getAttribute('data-tab');
+  <div class="gallery-grid">
 
-        document.querySelectorAll('.nav-item').forEach(function (nav) {
-          nav.classList.toggle('nav-item-active', nav === item);
-        });
+    <div class="photo-item third square" tabindex="0"
+         data-src="photos/photo-03.jpg"
+         data-title="Lava field" data-meta="Iceland · f/11 · ISO 64">
+      <img src="photos/photo-03.jpg" alt="Lava field, Iceland">
+      <div class="photo-caption">
+        <span class="caption-title">Lava field</span>
+        <span class="caption-meta">Iceland · f/11 · ISO 64</span>
+      </div>
+    </div>
 
-        document.querySelectorAll('.tab-panel').forEach(function (panel) {
-          panel.classList.toggle(
-            'tab-panel-active',
-            panel.id === 'tab-' + tab
-          );
-        });
-      });
+    <div class="photo-item third square" tabindex="0"
+         data-src="photos/photo-04.jpg"
+         data-title="Glacial melt" data-meta="Greenland · f/8 · ISO 64">
+      <img src="photos/photo-04.jpg" alt="Glacial melt, Greenland">
+      <div class="photo-caption">
+        <span class="caption-title">Glacial melt</span>
+        <span class="caption-meta">Greenland · f/8 · ISO 64</span>
+      </div>
+    </div>
+
+    <div class="photo-item third square" tabindex="0"
+         data-src="photos/photo-05.jpg"
+         data-title="Tundra storm" data-meta="Canada · f/9 · ISO 100">
+      <img src="photos/photo-05.jpg" alt="Tundra storm, Canada">
+      <div class="photo-caption">
+        <span class="caption-title">Tundra storm</span>
+        <span class="caption-meta">Canada · f/9 · ISO 100</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="gallery-grid">
+
+    <div class="photo-item half" tabindex="0"
+         data-src="photos/photo-06.jpg"
+         data-title="Fjord morning" data-meta="Norway · f/7.1 · ISO 64">
+      <img src="photos/photo-06.jpg" alt="Fjord morning, Norway">
+      <div class="photo-caption">
+        <span class="caption-title">Fjord morning</span>
+        <span class="caption-meta">Norway · f/7.1 · ISO 64</span>
+      </div>
+    </div>
+
+    <div class="photo-item half" tabindex="0"
+         data-src="photos/photo-07.jpg"
+         data-title="Desert hour" data-meta="Namibia · f/8 · ISO 64">
+      <img src="photos/photo-07.jpg" alt="Desert hour, Namibia">
+      <div class="photo-caption">
+        <span class="caption-title">Desert hour</span>
+        <span class="caption-meta">Namibia · f/8 · ISO 64</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="gallery-grid">
+
+    <div class="photo-item full" style="aspect-ratio: 21/8; overflow:hidden;" tabindex="0"
+         data-src="photos/photo-08.jpg"
+         data-title="Panorama — The long light" data-meta="Scotland · f/11 · ISO 64">
+      <img src="photos/photo-08.jpg" alt="Panorama, Scotland" style="aspect-ratio:21/8;">
+      <div class="photo-caption">
+        <span class="caption-title">The long light</span>
+        <span class="caption-meta">Scotland · Panorama · f/11 · ISO 64</span>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════
+     LIGHTBOX
+     ═══════════════════════════════════════════ -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <button class="lightbox-close" id="lb-close">Close ✕</button>
+  <button class="lightbox-nav lightbox-prev" id="lb-prev" aria-label="Previous">&#8592;</button>
+  <img class="lightbox-img" id="lb-img" src="" alt="">
+  <button class="lightbox-nav lightbox-next" id="lb-next" aria-label="Next">&#8594;</button>
+  <div class="lightbox-info">
+    <p class="lightbox-title" id="lb-title"></p>
+    <p class="lightbox-sub" id="lb-meta"></p>
+  </div>
+</div>
+
+<footer>
+  <span>&copy; 2026 Bruce Lomasky. All rights reserved.</span>
+  <div class="footer-hdr-note">
+    <span class="hdr-dot"></span>
+    <span>HDR images — gain map JPEG. Best experienced on HDR displays.</span>
+  </div>
+</footer>
+
+<script>
+  const items = Array.from(document.querySelectorAll('.photo-item'));
+  const lb    = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lb-img');
+  const lbTit = document.getElementById('lb-title');
+  const lbMet = document.getElementById('lb-meta');
+  let current = 0;
+
+  function openLightbox(index) {
+    current = index;
+    const el = items[index];
+    lbImg.src = el.dataset.src || el.querySelector('img').src;
+    lbImg.alt = el.querySelector('img').alt;
+    lbTit.textContent = el.dataset.title || '';
+    lbMet.textContent = el.dataset.meta  || '';
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    lb.focus();
+  }
+
+  function closeLightbox() {
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+    setTimeout(() => { lbImg.src = ''; }, 350);
+  }
+
+  function navigate(dir) {
+    current = (current + dir + items.length) % items.length;
+    const el = items[current];
+    lbImg.style.opacity = '0';
+    setTimeout(() => {
+      lbImg.src = el.dataset.src || el.querySelector('img').src;
+      lbImg.alt = el.querySelector('img').alt;
+      lbTit.textContent = el.dataset.title || '';
+      lbMet.textContent = el.dataset.meta  || '';
+      lbImg.style.opacity = '1';
+    }, 180);
+  }
+
+  lbImg.style.transition = 'opacity 0.18s ease';
+
+  items.forEach((el, i) => {
+    el.addEventListener('click', () => openLightbox(i));
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openLightbox(i); });
+  });
+
+  document.getElementById('lb-close').addEventListener('click', e => { e.stopPropagation(); closeLightbox(); });
+  document.getElementById('lb-prev').addEventListener('click', e => { e.stopPropagation(); navigate(-1); });
+  document.getElementById('lb-next').addEventListener('click', e => { e.stopPropagation(); navigate(1); });
+
+  lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
+
+  document.addEventListener('keydown', e => {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape')     closeLightbox();
+    if (e.key === 'ArrowLeft')  navigate(-1);
+    if (e.key === 'ArrowRight') navigate(1);
+  });
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry, idx) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), idx * 80);
+        io.unobserve(entry.target);
+      }
     });
+  }, { threshold: 0.1 });
 
-    // Lightbox behavior (preserving your existing logic)
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImage = lightbox.querySelector('.lightbox-image');
-    const lightboxTitle = lightbox.querySelector('.lightbox-caption h3');
-    const lightboxText = lightbox.querySelector('.lightbox-caption p');
-
-    document.querySelectorAll('.gallery-item img').forEach(function (img) {
-      img.addEventListener('click', function () {
-        const item = this.closest('.gallery-item');
-        const title = item.querySelector('h3').textContent;
-        const text = item.querySelector('p').textContent;
-
-        lightboxImage.src = this.src;
-        lightboxImage.alt = this.alt;
-        lightboxTitle.textContent = title;
-        lightboxText.textContent = text;
-
-        lightbox.classList.add('lightbox-open');
-      });
-    });
-
-    document
-      .querySelector('.lightbox-close')
-      .addEventListener('click', function () {
-        lightbox.classList.remove('lightbox-open');
-      });
-
-    document
-      .querySelector('.lightbox-backdrop')
-      .addEventListener('click', function () {
-        lightbox.classList.remove('lightbox-open');
-      });
-  </script>
+  items.forEach(el => io.observe(el));
+</script>
 </body>
 </html>
